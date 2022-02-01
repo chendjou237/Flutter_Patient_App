@@ -22,9 +22,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   var _specaility = "....";
   var _experience = "....";
   var _email;
+  var _wait;
 
   @override
   void initState() {
+    _wait = fetchData('speciality');
     super.initState();
     _specaility = fetchData('speciality') as String;
     _experience = fetchData('experience') as String;
@@ -47,176 +49,186 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      drawer: SideBar(),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                ClipPath(
-                  clipper: ProfileClipper(),
-                  child: Image(
-                    height: 300.0,
-                    width: double.infinity,
-                    image: AssetImage('assets/doctors.jpg'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Positioned(
-                  bottom: 10.0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black45,
-                          offset: Offset(0, 2),
-                          blurRadius: 6.0,
+    return FutureBuilder(
+        future: doctorsRef.doc(FirebaseAuth.instance.currentUser.uid).get(),
+        builder: (context, snap) {
+          String userN = _wait as String;
+          Map<String, dynamic> data = snap.data?.data()  as Map<String, dynamic>;
+          return Scaffold(
+            key: _scaffoldKey,
+            drawer: SideBar(),
+            body: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Stack(
+                    alignment: Alignment.center,
+                    children: <Widget>[
+                      ClipPath(
+                        clipper: ProfileClipper(),
+                        child: Image(
+                          height: 300.0,
+                          width: double.infinity,
+                          image: AssetImage('assets/doctors.jpg'),
+                          fit: BoxFit.cover,
                         ),
-                      ],
-                    ),
-                    child: ClipOval(
-                      child: Image(
-                        height: 120.0,
-                        width: 120.0,
-                        image: AssetImage('assets/user0.jpg'),
-                        fit: BoxFit.cover,
+                      ),
+                      Positioned(
+                        bottom: 10.0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black45,
+                                offset: Offset(0, 2),
+                                blurRadius: 6.0,
+                              ),
+                            ],
+                          ),
+                          child: ClipOval(
+                            child: Image(
+                              height: 120.0,
+                              width: 120.0,
+                              image: AssetImage('assets/user0.jpg'),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Text(
+                      "Welcome Doctor",
+                      style: TextStyle(
+                        fontSize: 25.0,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
                       ),
                     ),
                   ),
-                )
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.all(15.0),
-              child: Text(
-                "Welcome Doctor",
-                style: TextStyle(
-                  fontSize: 25.0,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                ),
+                  SizedBox(height: 20.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Column(
+                        children: <Widget>[
+                          Text(
+                            'Name',
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 22.0,
+                            ),
+                          ),
+                          SizedBox(height: 2.0),
+                          Text(
+                            "Dr. ${data['username']}",
+                            style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: <Widget>[
+                          Text(
+                            'Speciality',
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 22.0,
+                            ),
+                          ),
+                          SizedBox(height: 2.0),
+                          Text(
+                            "${data['speciality']}",
+                            style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 30.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Column(
+                        children: <Widget>[
+                          Text(
+                            'E - mail',
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 22.0,
+                            ),
+                          ),
+                          SizedBox(height: 2.0),
+                          Text(
+                            "$_email",
+                            style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: <Widget>[
+                          Text(
+                            'Experience',
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 22.0,
+                            ),
+                          ),
+                          SizedBox(height: 2.0),
+                          Text(
+                            "${data['experience']} years",
+                            style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 30.0),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  new EditProfile()));
+                    },
+                    child: Text("Edit Profile",
+                        style: TextStyle(
+                            fontSize: 15,
+                            letterSpacing: 2,
+                            color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                        primary: Colors.blue,
+                        padding: EdgeInsets.symmetric(horizontal: 50),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20))),
+                  )
+                ],
               ),
             ),
-            SizedBox(height: 20.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    Text(
-                      'Name',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 22.0,
-                      ),
-                    ),
-                    SizedBox(height: 2.0),
-                    Text(
-                      "Dr. $_name",
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: <Widget>[
-                    Text(
-                      'Speciality',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 22.0,
-                      ),
-                    ),
-                    SizedBox(height: 2.0),
-                    Text(
-                      "$_specaility",
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 30.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    Text(
-                      'E - mail',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 22.0,
-                      ),
-                    ),
-                    SizedBox(height: 2.0),
-                    Text(
-                      "$_email",
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: <Widget>[
-                    Text(
-                      'Experience',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 22.0,
-                      ),
-                    ),
-                    SizedBox(height: 2.0),
-                    Text(
-                      "$_experience years",
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 30.0),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (BuildContext context) => new EditProfile()));
-              },
-              child: Text("Edit Profile",
-                  style: TextStyle(
-                      fontSize: 15, letterSpacing: 2, color: Colors.white)),
-              style: ElevatedButton.styleFrom(
-                  primary: Colors.blue,
-                  padding: EdgeInsets.symmetric(horizontal: 50),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20))),
-            )
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 
-  fetchData(name){
+  fetchData(name) {
     String data;
-    doctorsRef.doc(FirebaseAuth.instance.currentUser.uid).get().then((value) =>
-      data = value.data()[name]
-    );
+    doctorsRef
+        .doc(FirebaseAuth.instance.currentUser.uid)
+        .get()
+        .then((value) => data = value.data()[name]);
     return data;
   }
 }

@@ -40,16 +40,24 @@ class _MyFirstPageState extends State<MyFirstPage> {
   }
 
   fetchDoctorsInfos() async {
-    var snapQuery = await docsRef.get();
-    snapQuery.docs.forEach((d) {
-      _tmpDocs.add(createDocWidget(d["imgUrl"],
-          "${d['firstName']} ${d['lastName']}", d.id, d["shortDescription"]));
-      specialities.add(d["speciality"]);
-    });
+    var snapQuery = await doctorsRef.get();
+    try {
+      snapQuery.docs.forEach((d) {
+        print("val of the doc:  ${d.data().toString()}");
+        _tmpDocs.add(createDocWidget(
+            /*d["imgUrl"  ] ?? '' */ 'http://www.jeanlouismedical.com/img/doctor-profile-small.png',
+            "${d['username'] ?? ''} ${d['email'] ?? ''}",
+            d.id ?? '',
+            d["description"]));
+        specialities.add(d["speciality"] ?? '');
+      });
 
-    setState(() {
-      docs = _tmpDocs;
-    });
+      setState(() {
+        docs = _tmpDocs;
+      });
+    } on FirebaseException catch (e) {
+      print(e.message);
+    }
   }
 
   sortBySpecialty(String speciality) {
@@ -94,14 +102,11 @@ class _MyFirstPageState extends State<MyFirstPage> {
                       height: 75,
                       width: 75,
                       decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(colors: [
-                            getStartedColorStart,
-                            getStartedColorEnd
-                          ], stops: [
-                            0,
-                            1
-                          ])),
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                            colors: [getStartedColorStart, getStartedColorEnd],
+                            stops: [0, 1]),
+                      ),
                       child: Center(
                         child: Text(
                           "User",
@@ -170,13 +175,11 @@ class _MyFirstPageState extends State<MyFirstPage> {
                       ),
                       Container(
                         height: 300,
-                        child: SingleChildScrollView(
+                        child: ListView(
                           physics: BouncingScrollPhysics(),
-                          child: Column(
-                            children: <Widget>[
-                              ...docs,
-                            ],
-                          ),
+                          children: <Widget>[
+                            ...docs,
+                          ],
                         ),
                       )
                     ],

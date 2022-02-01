@@ -103,16 +103,16 @@ class _EditProfileState extends State<EditProfile> {
                             borderRadius: BorderRadius.circular(20))),
                   ),
                   ElevatedButton(
-                    onPressed: () {
-                      doctorsRef.doc(currentUser.uid).set({
-                        "username": label_vlaue["Name"],
-                        "email": label_vlaue["Email"],
-                        "password": label_vlaue["Password"],
-                        "phone": label_vlaue["Phone"],
-                        "experience": label_vlaue["Experience"],
-                        "description": label_vlaue["Description"],
-                        "speciality": label_vlaue["Speciality"],
-                        "hospital": label_vlaue["Hospital"]
+                    onPressed: ()async {
+                    await  doctorsRef.doc(currentUser.uid).set({
+                        "username": label_vlaue["Name"] ?? "",
+                        "email": label_vlaue["Email"] ?? "",
+                        "password": label_vlaue["Password"] ?? "",
+                        "phone": label_vlaue["Phone"] ?? "",
+                        "experience": label_vlaue["Experience"] ?? '',
+                        "description": label_vlaue["Description"] ?? '',
+                        "speciality": label_vlaue["Speciality"] ?? "",
+                        "hospital": label_vlaue["Hospital"]?? "",
                       });
                       Fluttertoast.showToast(
                           msg: 'Profile Updated Successfully',
@@ -121,6 +121,7 @@ class _EditProfileState extends State<EditProfile> {
                           backgroundColor: Colors.green,
                           textColor: Colors.red);
                       Navigator.of(context).maybePop();
+                      print(label_vlaue.toString());
                     },
                     child: Text("SAVE",
                         style: TextStyle(

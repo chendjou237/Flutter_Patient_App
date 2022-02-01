@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -6,6 +7,7 @@ import 'Doctor/sidebar/sidebar_layout.dart';
 import 'LaboratoryAssistant/sidebar/sidebar_layout.dart';
 import 'Pharmacie/Scan_generate_QR/Scan.dart';
 import 'Radiologist/sidebar/sidebar_layout.dart';
+import 'main.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -25,6 +27,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  signOut() async {
+    _auth.signOut();
+    final googleSignIn = GoogleSignIn();
+    await googleSignIn.signOut();
+  }
+
   getUser() async {
     User firebaseUser = _auth.currentUser;
     await firebaseUser?.reload();
@@ -36,12 +44,6 @@ class _HomePageState extends State<HomePage> {
         this.isloggedin = true;
       });
     }
-  }
-
-  signOut() async {
-    _auth.signOut();
-    final googleSignIn = GoogleSignIn();
-    await googleSignIn.signOut();
   }
 
   @override
@@ -90,7 +92,6 @@ class _HomePageState extends State<HomePage> {
                 RaisedButton(
                   padding: EdgeInsets.fromLTRB(70, 10, 70, 10),
                   onPressed: () => {
-
                     if (user.displayName == "Doctor")
                       {
                         Navigator.push(
@@ -100,46 +101,56 @@ class _HomePageState extends State<HomePage> {
                                 builder: (BuildContext context) =>
                                     new SideBarLayoutDoctor()))
                       }
-
                     else if (user.displayName == "Patient")
+                      {
+                        //firebase firestore set value in a collection
+                        doctorsRef.get().then((QuerySnapshot snapshot) {
+                          snapshot.docs.forEach((f) {
+                            f.reference.set({
+                              "availabletimes": [
+                                Timestamp.fromDate(DateTime.now()),
+                                Timestamp.fromDate(
+                                    DateTime.now().add(Duration(hours: 2))),
+                                Timestamp.fromDate(
+                                    DateTime.now().add(Duration(hours: 4))),
+                              ]
+                            });
+                          });
+                        }),
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                // builder: (BuildContext context) => new EditProfile()))
+                                builder: (BuildContext context) =>
+                                    new SideBarLayoutPatient()))
+                      }
+                    else if (user.displayName == "Lab Assistant")
                       {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                              // builder: (BuildContext context) => new EditProfile()))
-                                builder: (BuildContext context) =>
-                                new SideBarLayoutPatient()))
-                      }
-
-                    else if (user.displayName == "Lab Assistant")
-                        {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
                                 // builder: (BuildContext context) => new EditProfile()))
-                                  builder: (BuildContext context) =>
-                                  new SideBarLayoutLaboratoryAssistant()))
-                        }
-
-                      else if (user.displayName == "Radiologist")
-                          {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  // builder: (BuildContext context) => new EditProfile()))
-                                    builder: (BuildContext context) =>
+                                builder: (BuildContext context) =>
+                                    new SideBarLayoutLaboratoryAssistant()))
+                      }
+                    else if (user.displayName == "Radiologist")
+                      {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                // builder: (BuildContext context) => new EditProfile()))
+                                builder: (BuildContext context) =>
                                     new SideBarLayoutRadiologist()))
-                          }
-                        else if (user.displayName == "Radiologist")
-                            {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    // builder: (BuildContext context) => new EditProfile()))
-                                      builder: (BuildContext context) =>
-                                      new ScanPage()))
-                            }
-
+                      }
+                    else if (user.displayName == "Radiologist")
+                      {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                // builder: (BuildContext context) => new EditProfile()))
+                                builder: (BuildContext context) =>
+                                    new ScanPage()))
+                      }
                   },
                   child: Text('Continue',
                       style: TextStyle(
