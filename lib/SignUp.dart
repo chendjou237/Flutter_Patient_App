@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:form_field_validator/form_field_validator.dart';
 import 'package:patient_app/main.dart';
+import 'package:local_auth/local_auth.dart';
 
 class SignUp extends StatefulWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -33,6 +35,15 @@ class _SignUpState extends State<SignUp> {
 
   signUp() async {
     print(_role);
+    var localAuth = LocalAuthentication();
+
+    if (await localAuth.canCheckBiometrics) {
+      bool didAuthenticate = await localAuth.authenticate(
+          localizedReason: 'Please authenticate to show account balance',
+          biometricOnly: true);
+    } else {
+      print("no local auth allow");
+    }
     if (_role == null) {
       Fluttertoast.showToast(
           msg: 'Please Select a role',
@@ -79,6 +90,14 @@ class _SignUpState extends State<SignUp> {
         });
   }
 
+  final passwordValidator = MultiValidator([
+    RequiredValidator(errorText: 'password is required'),
+    MinLengthValidator(8, errorText: 'password must be at least 8 digits long'),
+    PatternValidator(r'(?=.*?[#?!@$%^&*-])',
+        errorText: 'passwords must have at least one special character')
+  ]);
+
+  String password;
   @override
   Widget build(BuildContext context) {
     List<Item> users = <Item>[
@@ -175,9 +194,8 @@ class _SignUpState extends State<SignUp> {
                         ),
                         Container(
                           child: TextFormField(
-                              validator: (input) {
-                                if (input.isEmpty) return 'Enter Email';
-                              },
+                              validator: EmailValidator(
+                                  errorText: 'ENTER A STANDARD EMAIL'),
                               decoration: InputDecoration(
                                   labelText: 'Email',
                                   prefixIcon: Icon(Icons.email)),
@@ -185,10 +203,9 @@ class _SignUpState extends State<SignUp> {
                         ),
                         Container(
                           child: TextFormField(
-                              validator: (input) {
-                                if (input.length < 6)
-                                  return 'Provide Minimum 6 Character';
-                              },
+                              validator: passwordValidator,
+                              // keyboardType: TextInputType.obscurePassword,
+                              onChanged: (val) => password = val,
                               decoration: InputDecoration(
                                 labelText: 'Password',
                                 prefixIcon: Icon(Icons.lock),
@@ -197,6 +214,19 @@ class _SignUpState extends State<SignUp> {
                               onSaved: (input) => _password = input),
                         ),
                         SizedBox(height: 20),
+                        Container(
+                          child: TextFormField(
+                              validator: (val) => MatchValidator(
+                                      errorText: 'passwords do not match')
+                                  .validateMatch(val, password),
+                              // keyboardType: TextInputType.obscurePassword,
+                              decoration: InputDecoration(
+                                labelText: 'Confirm Password',
+                                prefixIcon: Icon(Icons.lock),
+                              ),
+                              obscureText: true,
+                              onSaved: (input) => _password = input),
+                        ),
                         RaisedButton(
                           padding: EdgeInsets.fromLTRB(70, 10, 70, 10),
                           onPressed: signUp,
