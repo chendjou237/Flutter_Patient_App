@@ -1,7 +1,11 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rxdart/rxdart.dart';
+import '../../SignUp.dart';
+import '../../Start.dart';
 import '../bloc.navigation_bloc/navigation_bloc.dart';
 import '../sidebar/menu_item.dart';
 
@@ -48,6 +52,13 @@ class _SideBarState extends State<SideBar>
       isSidebarOpenedSink.add(true);
       _animationController.forward();
     }
+  }
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+ signOut() async {
+    _auth.signOut();
+    final googleSignIn = GoogleSignIn();
+    await googleSignIn.signOut();
   }
 
   @override
@@ -154,6 +165,15 @@ class _SideBarState extends State<SideBar>
                       MenuItem(
                         icon: Icons.exit_to_app,
                         title: "Logout",
+                        onTap: () {
+                          onIconPressed();
+                          signOut();
+                          Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                  builder: (context) => Start()),
+                              (Route<dynamic> route) => false);
+                          
+                        },
                       ),
                       Divider(
                         height: 44,

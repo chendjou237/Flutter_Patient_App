@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:patient_app/Patient/bloc.navigation_bloc/navigation_bloc.dart';
 import 'package:patient_app/models/user_model.dart';
 import 'package:patient_app/Patient/sidebar/sidebar.dart';
@@ -28,7 +29,7 @@ class _ProfileScreenState extends State<ProfilePage> {
     _favoritesPageController =
         PageController(initialPage: 0, viewportFraction: 0.8);
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
