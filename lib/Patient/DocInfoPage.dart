@@ -44,15 +44,17 @@ class _docInfoPageState extends State<docInfoPage> {
     var refeferenceData = FirebaseFirestore.instance.collection("doctors");
     var data = await refeferenceData.doc(widget.docId).get();
     datalist.clear();
+    
     dat = new Data(
-      data["imgUrl"],
-      data["firstName"],
-      data["lastName"],
+      /* data["imgUrl"]*/ 'http://www.jeanlouismedical.com/img/doctor-profile-small.png',
+      data["username"],
+      data["email"],
       data["speciality"],
       data["hospital"],
-      data["shortDescription"],
-      data["longDescription"],
-      data["availableTime"],
+      data["description"],
+      data["experience"],
+      data["availableTimes"].map((date) => date.toDate()).toList() ??
+          [DateTime(1, 1, 1, 1), DateTime(2, 2, 2, 2), DateTime(3, 2, 2, 2)],
     );
 
     setState(() {
@@ -254,14 +256,15 @@ class _docInfoPageState extends State<docInfoPage> {
                           SizedBox(
                             height: 5,
                           ),
-                          timeSlotWidget("13", "MAY", "Consultation",
-                              "Sunday 9 am to 11.30 am"),
-                          timeSlotWidget("14", "MAY", "Consultation",
-                              "Monday 10 am to 12.30 am"),
-                          timeSlotWidget("1", "JUN", "Consultation",
-                              "Wednesday 8 am to 12.30 pm"),
-                          timeSlotWidget("3", "JUN", "Consultation",
-                              "Friday 8 am to 1 am"),
+                          ...dat.availableTime.map((date) => timeSlotWidget(date.day.toString(), date.month.toString(), "consultation", "Sunday ${date.hour.toString()} to ${(date.hour + 2).toString()} "))
+                          // timeSlotWidget("13", "MAY", "Consultation",
+                          //     "Sunday 9 am to 11.30 am"),
+                          // timeSlotWidget("14", "MAY", "Consultation",
+                          //     "Monday 10 am to 12.30 am"),
+                          // timeSlotWidget("1", "JUN", "Consultation",
+                          //     "Wednesday 8 am to 12.30 pm"),
+                          // timeSlotWidget("3", "JUN", "Consultation",
+                          //     "Friday 8 am to 1 am"),
                         ],
                       ),
                     )

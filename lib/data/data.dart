@@ -18,7 +18,7 @@ final User currentUser = User(
 
 class Data {
   String imgUrl, firstName, lastName, speciality, hospital, shortDesc, longDesc;
-  Timestamp availableTime;
+  List<DateTime> availableTime;
   Data(this.imgUrl, this.firstName, this.lastName, this.speciality,
       this.hospital, this.shortDesc, this.longDesc, this.availableTime);
 }
