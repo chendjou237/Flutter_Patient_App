@@ -76,7 +76,9 @@ class _SignUpState extends State<SignUp> {
             Get.to(() => OtpScreen(
                   email: _email,
                 ));
-            if (role == "Doctor") {}
+            if (role == "Doctor") {
+              
+            }
             // await Navigator.pushReplacementNamed(context,"/") ;
 
           }

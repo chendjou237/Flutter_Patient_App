@@ -123,7 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           SizedBox(height: 2.0),
                           Text(
-                            "Dr. ${data['username']}",
+                            "Dr. ${data['username'] }" ,
                             style: TextStyle(
                               fontSize: 20.0,
                               fontWeight: FontWeight.w600,

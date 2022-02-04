@@ -44,7 +44,7 @@ class _ProfileScreenState extends State<ProfilePage> {
         future: patientsRef.doc(FirebaseAuth.instance.currentUser.uid).get(),
         builder: (context, snapshot) {
           Map<String, dynamic> data =
-              snapshot.data?.data() as Map<String, dynamic>;
+              snapshot.data?.data() ;
           return Scaffold(
             key: _scaffoldKey,
             drawer: SideBar(),
@@ -114,7 +114,7 @@ class _ProfileScreenState extends State<ProfilePage> {
                               ),
                               SizedBox(height: 2.0),
                               AutoSizeText(
-                                "Mr ${data['firstName']}",
+                                "Mr ${ data['firstName']}" , 
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                 ),
