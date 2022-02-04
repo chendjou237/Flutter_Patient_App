@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:patient_app/main.dart';
 import 'package:firebase_core/firebase_core.dart';
+import '../Login.dart';
+import '../SignUp.dart';
 import 'bloc.navigation_bloc/navigation_bloc.dart';
 
 class EditProfile extends StatefulWidget with NavigationStates {
@@ -12,6 +14,8 @@ class EditProfile extends StatefulWidget with NavigationStates {
 class _EditProfileState extends State<EditProfile> {
   bool isObscurePassword = true;
   Map label_vlaue = Map<String, String>();
+  String sex = '';
+  String marital = '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,13 +81,42 @@ class _EditProfileState extends State<EditProfile> {
                 ),
               ),
               SizedBox(height: 30),
-              buildTextField("name", "First&Last Name", false),
-              buildTextField("email", "email", false),
-              buildTextField("pass", "Password", true),
-              buildTextField("phone", "Phone", false),
+              buildTextField("fname", "First Name", false),
+              buildTextField("lname", "Last Name", false),
+              buildTextField("hphone", "home phone number", true),
+              buildTextField("wphone", "work Phone number", false),
               buildTextField("age", "Age", false),
+              DropdownButton<String>(
+                items: <String>['Male', 'Female', 'Undefine', 'Both']
+                    .map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (_) {
+                  sex = _;
+                },
+              ),
               buildTextField("cin", "CIN", false),
-              buildTextField("desc", "Description", false),
+              buildTextField("saddress1", "street address1", false),
+              buildTextField("saddress2", "street address2", false),
+              buildTextField("city", "city", false),
+              buildTextField("country", "country", false),
+              DropdownButton<String>(
+                items: <String>['Single', 'Couple', 'Divorce', 'Undefine']
+                    .map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (_) {
+                  marital = _;
+                },
+              ),
+              buildTextField("hospitalname", "hospital name", false),
+              buildTextField("hospitaladdress", "hospital address", false),
               SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -103,12 +136,21 @@ class _EditProfileState extends State<EditProfile> {
                   ElevatedButton(
                     onPressed: () {
                       patientsRef.doc(currentUser.uid).set({
-                        "username": label_vlaue["name"],
-                        "email": label_vlaue["email"],
-                        "password": label_vlaue["pass"],
-                        "phone": label_vlaue["phone"],
+                        "firstName": label_vlaue["fname"],
+                        "lastName": label_vlaue["lname"],
+                        "email": currentUser.email,
+                        "password": loginpassword == ""? signuppassword: loginpassword,
+                        "homePhone": label_vlaue["hphone"],
+                        "streetAddress1": label_vlaue["saddress1"],
+                        "streetAddress2": label_vlaue["saddress2"],
+                        "city": label_vlaue["city"],
+                        "country": label_vlaue["country"],
+                        "hospitalName": label_vlaue["hospitalname"],
+                        "hospitalAddress": label_vlaue["hospitaladdress"],
+                        "workPhone": label_vlaue["wphone"],
                         "cin": label_vlaue["cin"],
-                        "description": label_vlaue["desc"],
+                        "gender": sex,
+                        "marital": marital,
                         "age": label_vlaue["age"],
                       }).then((value) => print(
                           "uploaded successfully user : ${currentUser.uid} ! ${label_vlaue["name"]}"));

@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:get/get.dart';
 import 'package:patient_app/main.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:email_auth/email_auth.dart';
+
+import 'otp_screen.dart';
+
+String signuppassword;
 
 class SignUp extends StatefulWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -27,10 +33,14 @@ class _SignUpState extends State<SignUp> {
     });
   }
 
+  EmailAuth emailAuth;
   @override
   void initState() {
     super.initState();
     this.checkAuthentication();
+    emailAuth = new EmailAuth(
+      sessionName: "Sample session",
+    );
   }
 
   signUp() async {
@@ -39,7 +49,7 @@ class _SignUpState extends State<SignUp> {
 
     if (await localAuth.canCheckBiometrics) {
       bool didAuthenticate = await localAuth.authenticate(
-          localizedReason: 'Please authenticate to show account balance',
+          localizedReason: 'Please authenticate to complete your registration',
           biometricOnly: true);
     } else {
       print("no local auth allow");
@@ -57,9 +67,15 @@ class _SignUpState extends State<SignUp> {
         try {
           UserCredential user = await _auth.createUserWithEmailAndPassword(
               email: _email, password: _password);
+              signuppassword = _password;
+          await sendOtp();
           if (user != null) {
-            await _auth.currentUser.updateProfile(displayName: _role);
+            await _auth.currentUser.updateDisplayName(_role);
             String role = currentUser.displayName;
+
+            Get.to(() => OtpScreen(
+                  email: _email,
+                ));
             if (role == "Doctor") {}
             // await Navigator.pushReplacementNamed(context,"/") ;
 
@@ -98,6 +114,23 @@ class _SignUpState extends State<SignUp> {
   ]);
 
   String password;
+
+  Future<void> sendOtp() async {
+    bool result = await emailAuth.sendOtp(recipientMail: _email, otpLength: 5);
+    // Get.to(()=> OtpScreen());
+    if (result) {
+      // using a void function because i am using a
+      // stateful widget and seting the state from here.
+      return true;
+      // Navigator.push(context, MaterialPageRoute(builder: (context) {
+      //   return OtpScreen(email: _email);
+      // }));
+      // Navigator.pushReplacementNamed(context, "/otp",arguments: _email);
+
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Item> users = <Item>[
@@ -106,148 +139,149 @@ class _SignUpState extends State<SignUp> {
       const Item(
           'Patient', Icon(Icons.verified_user, color: Colors.blueAccent)),
       const Item(
-          'Lab Assistant',
-          Icon(
-            Icons.assistant,
-            color: Colors.blueAccent,
-          )),
+        'Lab Assistant',
+        Icon(
+          Icons.assistant,
+          color: Colors.blueAccent,
+        ),
+      ),
       const Item(
-          'Radiologist',
-          Icon(
-            Icons.ac_unit,
-            color: Colors.blueAccent,
-          )),
+        'Radiologist',
+        Icon(
+          Icons.ac_unit,
+          color: Colors.blueAccent,
+        ),
+      ),
       const Item(
-          'Pharmacist',
-          Icon(
-            Icons.local_pharmacy,
-            color: Colors.blueAccent,
-          ))
+        'Pharmacist',
+        Icon(
+          Icons.local_pharmacy,
+          color: Colors.blueAccent,
+        ),
+      ),
     ];
     return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () =>
-                Navigator.of(context).pushReplacementNamed("start"),
-          ),
-          title: Text("back"),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pushReplacementNamed("start"),
         ),
-        body: SingleChildScrollView(
-          child: Container(
-            child: Column(
-              children: <Widget>[
-                Container(
-                  height: 200,
-                  child: Image(
-                    image: AssetImage("assets/$_imageName"),
-                    fit: BoxFit.contain,
+        title: Text("back"),
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          child: Column(
+            children: <Widget>[
+              Container(
+                height: 200,
+                child: Image(
+                  image: AssetImage("assets/$_imageName"),
+                  fit: BoxFit.contain,
+                ),
+              ),
+              Container(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        child: DropdownButton<Item>(
+                          hint: Text("Select Role"),
+                          value: selectedUser,
+                          onChanged: (Item Value) {
+                            selectedUser = Value;
+                            setState(() {
+                              selectedUser;
+                              if (selectedUser.name == "Doctor") {
+                                _imageName = "onBoardDoc.png";
+                              } else if (selectedUser.name == "Patient") {
+                                _imageName = "patients.jpg";
+                              } else if (selectedUser.name == "Lab Assistant") {
+                                _imageName = "images/docprofile/doc3.png";
+                              } else if (selectedUser.name == "Radiologist") {
+                                _imageName = "category7.png";
+                              } else {
+                                _imageName = "category3.png";
+                              }
+                              _role = selectedUser.name;
+                            });
+                          },
+                          items: users.map((Item user) {
+                            return DropdownMenuItem<Item>(
+                              value: user,
+                              child: Row(
+                                children: <Widget>[
+                                  user.icon,
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    user.name,
+                                    style: TextStyle(color: Colors.blueAccent),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      Container(
+                        child: TextFormField(
+                            validator: EmailValidator(
+                                errorText: 'ENTER A STANDARD EMAIL'),
+                            decoration: InputDecoration(
+                                labelText: 'Email',
+                                prefixIcon: Icon(Icons.email)),
+                            onSaved: (input) => _email = input),
+                      ),
+                      Container(
+                        child: TextFormField(
+                            validator: passwordValidator,
+                            // keyboardType: TextInputType.obscurePassword,
+                            onChanged: (val) => password = val,
+                            decoration: InputDecoration(
+                              labelText: 'Password',
+                              prefixIcon: Icon(Icons.lock),
+                            ),
+                            obscureText: true,
+                            onSaved: (input) => _password = input),
+                      ),
+                      SizedBox(height: 20),
+                      Container(
+                        child: TextFormField(
+                            validator: (val) => MatchValidator(
+                                    errorText: 'passwords do not match')
+                                .validateMatch(val, password),
+                            // keyboardType: TextInputType.obscurePassword,
+                            decoration: InputDecoration(
+                              labelText: 'Confirm Password',
+                              prefixIcon: Icon(Icons.lock),
+                            ),
+                            obscureText: true,
+                            onSaved: (input) => _password = input),
+                      ),
+                      RaisedButton(
+                        padding: EdgeInsets.fromLTRB(70, 10, 70, 10),
+                        onPressed: signUp,
+                        child: Text('SignUp',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold)),
+                        color: Colors.blueAccent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Container(
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          child: DropdownButton<Item>(
-                            hint: Text("Select Role"),
-                            value: selectedUser,
-                            onChanged: (Item Value) {
-                              selectedUser = Value;
-                              setState(() {
-                                selectedUser;
-                                if (selectedUser.name == "Doctor") {
-                                  _imageName = "onBoardDoc.png";
-                                } else if (selectedUser.name == "Patient") {
-                                  _imageName = "patients.jpg";
-                                } else if (selectedUser.name ==
-                                    "Lab Assistant") {
-                                  _imageName = "images/docprofile/doc3.png";
-                                } else if (selectedUser.name == "Radiologist") {
-                                  _imageName = "category7.png";
-                                } else {
-                                  _imageName = "category3.png";
-                                }
-                                _role = selectedUser.name;
-                              });
-                            },
-                            items: users.map((Item user) {
-                              return DropdownMenuItem<Item>(
-                                value: user,
-                                child: Row(
-                                  children: <Widget>[
-                                    user.icon,
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text(
-                                      user.name,
-                                      style:
-                                          TextStyle(color: Colors.blueAccent),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        Container(
-                          child: TextFormField(
-                              validator: EmailValidator(
-                                  errorText: 'ENTER A STANDARD EMAIL'),
-                              decoration: InputDecoration(
-                                  labelText: 'Email',
-                                  prefixIcon: Icon(Icons.email)),
-                              onSaved: (input) => _email = input),
-                        ),
-                        Container(
-                          child: TextFormField(
-                              validator: passwordValidator,
-                              // keyboardType: TextInputType.obscurePassword,
-                              onChanged: (val) => password = val,
-                              decoration: InputDecoration(
-                                labelText: 'Password',
-                                prefixIcon: Icon(Icons.lock),
-                              ),
-                              obscureText: true,
-                              onSaved: (input) => _password = input),
-                        ),
-                        SizedBox(height: 20),
-                        Container(
-                          child: TextFormField(
-                              validator: (val) => MatchValidator(
-                                      errorText: 'passwords do not match')
-                                  .validateMatch(val, password),
-                              // keyboardType: TextInputType.obscurePassword,
-                              decoration: InputDecoration(
-                                labelText: 'Confirm Password',
-                                prefixIcon: Icon(Icons.lock),
-                              ),
-                              obscureText: true,
-                              onSaved: (input) => _password = input),
-                        ),
-                        RaisedButton(
-                          padding: EdgeInsets.fromLTRB(70, 10, 70, 10),
-                          onPressed: signUp,
-                          child: Text('SignUp',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold)),
-                          color: Colors.blueAccent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
 

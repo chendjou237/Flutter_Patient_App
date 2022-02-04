@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
@@ -45,82 +46,86 @@ class _StartState extends State<Start> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            SizedBox(height: 75.0),
-            Container(
-                child: Lottie.asset(
-                  'assets/doctor-welcoming-patient.json',
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 2.8,
-                ),
-            ),
-            SizedBox(height: 7),
-            RichText(
-                text: TextSpan(
-                    text: 'Welcome to ',
-                    style: TextStyle(
-                        fontSize: 25.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
-                    children: <TextSpan>[
-                  TextSpan(
-                      text: 'HOSPY',
-                      style: TextStyle(
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue))
-                ])),
-            SizedBox(height: 10.0),
-            Text(
-              'the number one hospital management app',
-              style: TextStyle(color: Colors.black),
-            ),
-            SizedBox(height: 30.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+    // return FutureBuilder<Object>(
+    //   future: FirebaseFirestore.instance.collection('patients').get(),
+    //   builder: (context, snapshot) {
+        return Scaffold(
+          body: Container(
+            child: Column(
               children: <Widget>[
-                RaisedButton(
-                    padding: EdgeInsets.only(left: 30, right: 30),
-                    onPressed: navigateToLogin,
-                    child: Text(
-                      'LOGIN',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                SizedBox(height: 75.0),
+                Container(
+                    child: Lottie.asset(
+                      'assets/doctor-welcoming-patient.json',
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height / 2.8,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    color: Colors.blueAccent),
-                SizedBox(width: 20.0),
-                RaisedButton(
-                    padding: EdgeInsets.only(left: 30, right: 30),
-                    onPressed: navigateToRegister,
-                    child: Text(
-                      'REGISTER',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    color: Colors.blueAccent),
+                ),
+                SizedBox(height: 7),
+                RichText(
+                    text: TextSpan(
+                        text: 'Welcome to ',
+                        style: TextStyle(
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                        children: <TextSpan>[
+                      TextSpan(
+                          text: 'HOSPY',
+                          style: TextStyle(
+                              fontSize: 30.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue))
+                    ])),
+                SizedBox(height: 10.0),
+                Text(
+                  'the number one hospital management app',
+                  style: TextStyle(color: Colors.black),
+                ),
+                SizedBox(height: 30.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    RaisedButton(
+                        padding: EdgeInsets.only(left: 30, right: 30),
+                        onPressed: navigateToLogin,
+                        child: Text(
+                          'LOGIN',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        color: Colors.blueAccent),
+                    SizedBox(width: 20.0),
+                    RaisedButton(
+                        padding: EdgeInsets.only(left: 30, right: 30),
+                        onPressed: navigateToRegister,
+                        child: Text(
+                          'REGISTER',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        color: Colors.blueAccent),
+                  ],
+                ),
+                SizedBox(height: 20.0),
+                SignInButton(Buttons.Google,
+                    text: "Sign up with Google", onPressed: googleSignIn)
               ],
             ),
-            SizedBox(height: 20.0),
-            SignInButton(Buttons.Google,
-                text: "Sign up with Google", onPressed: googleSignIn)
-          ],
-        ),
-      ),
-    );
-  }
+          ),
+        );
+      }
+  
 }
