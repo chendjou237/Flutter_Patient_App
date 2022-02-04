@@ -7,7 +7,7 @@ import 'package:patient_app/main.dart';
 import 'package:patient_app/models/user_model.dart' as My;
 import 'package:patient_app/Patient/sidebar/sidebar.dart';
 import 'package:patient_app/Patient/profile_clipper.dart';
-import 'package:patient_app/main.dart' as main;
+
 
 class ProfilePage extends StatefulWidget with NavigationStates {
   final My.User user;
